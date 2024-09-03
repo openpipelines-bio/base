@@ -1,0 +1,378 @@
+USAGE: MarkDuplicatesSpark [arguments]
+
+Marks duplicates on spark
+Version:4.6.0.0
+
+
+Required Arguments:
+
+--input,-I <GATKPath>         BAM/SAM/CRAM file containing reads  This argument must be specified at least once.
+                              Required. 
+
+--output,-O <String>          the output bam  Required. 
+
+
+Optional Arguments:
+
+--add-output-vcf-command-line <Boolean>
+                              If true, adds a command line header line to created VCF files.  Default value: true.
+                              Possible values: {true, false} 
+
+--arguments_file <File>       read one or more arguments files and add them to the command line  This argument may be
+                              specified 0 or more times. Default value: null. 
+
+--bam-partition-size <Long>   maximum number of bytes to read from a file into each partition of reads. Setting this
+                              higher will result in fewer partitions. Note that this will not be equal to the size of
+                              the partition in memory. Defaults to 0, which uses the default split size (determined by
+                              the Hadoop input format, typically the size of one HDFS block).  Default value: 0. 
+
+--conf <String>               Spark properties to set on the Spark context in the format <property>=<value>  This
+                              argument may be specified 0 or more times. Default value: null. 
+
+--create-output-bam-index,-OBI <Boolean>
+                              If true, create a BAM index when writing a coordinate-sorted BAM file.  Default value:
+                              true. Possible values: {true, false} 
+
+--create-output-bam-splitting-index <Boolean>
+                              If true, create a BAM splitting index (SBI) when writing a coordinate-sorted BAM file. 
+                              Default value: true. Possible values: {true, false} 
+
+--create-output-variant-index,-OVI <Boolean>
+                              If true, create a VCF index when writing a coordinate-sorted VCF file.  Default value:
+                              true. Possible values: {true, false} 
+
+--disable-read-filter,-DF <String>
+                              Read filters to be disabled before analysis  This argument may be specified 0 or more
+                              times. Default value: null. Possible values: {AllowAllReadsReadFilter} 
+
+--disable-sequence-dictionary-validation <Boolean>
+                              If specified, do not check the sequence dictionaries from our inputs for compatibility.
+                              Use at your own risk!  Default value: false. Possible values: {true, false} 
+
+--do-not-mark-unmapped-mates <Boolean>
+                              Enabling this option will mean unmapped mates of duplicate marked reads will not be marked
+                              as duplicates.  Default value: false. Possible values: {true, false} 
+
+--duplicate-scoring-strategy,-DS <MarkDuplicatesScoringStrategy>
+                              The scoring strategy for choosing the non-duplicate among candidates.  Default value:
+                              SUM_OF_BASE_QUALITIES. Possible values: {SUM_OF_BASE_QUALITIES,
+                              TOTAL_MAPPED_REFERENCE_LENGTH, FLOW_SUM_OF_BASE_QUALITIES} 
+
+--duplicate-tagging-policy <DuplicateTaggingPolicy>
+                              Determines how duplicate types are recorded in the DT optional attribute.  Default value:
+                              DontTag. Possible values: {DontTag, OpticalOnly, All}  Cannot be used in conjunction with
+                              argument(s) removeAllDuplicates removeSequencingDuplicates
+
+--exclude-intervals,-XL <String>
+                              One or more genomic intervals to exclude from processing  This argument may be specified 0
+                              or more times. Default value: null. 
+
+--gatk-config-file <String>   A configuration file to use with the GATK.  Default value: null. 
+
+--gcs-max-retries,-gcs-retries <Integer>
+                              If the GCS bucket channel errors out, how many times it will attempt to re-initiate the
+                              connection  Default value: 20. 
+
+--gcs-project-for-requester-pays <String>
+                              Project to bill when accessing "requester pays" buckets. If unset, these buckets cannot be
+                              accessed.  User must have storage.buckets.get permission on the bucket being accessed. 
+                              Default value: . 
+
+--help,-h <Boolean>           display the help message  Default value: false. Possible values: {true, false} 
+
+--interval-exclusion-padding,-ixp <Integer>
+                              Amount of padding (in bp) to add to each interval you are excluding.  Default value: 0. 
+
+--interval-merging-rule,-imr <IntervalMergingRule>
+                              Interval merging rule for abutting intervals  Default value: ALL. Possible values: {ALL,
+                              OVERLAPPING_ONLY} 
+
+--interval-padding,-ip <Integer>
+                              Amount of padding (in bp) to add to each interval you are including.  Default value: 0. 
+
+--interval-set-rule,-isr <IntervalSetRule>
+                              Set merging approach to use for combining interval inputs  Default value: UNION. Possible
+                              values: {UNION, INTERSECTION} 
+
+--intervals,-L <String>       One or more genomic intervals over which to operate  This argument may be specified 0 or
+                              more times. Default value: null. 
+
+--inverted-read-filter,-XRF <String>
+                              Inverted (with flipped acceptance/failure conditions) read filters applied before analysis
+                              (after regular read filters).  This argument may be specified 0 or more times. Default
+                              value: null. 
+
+--metrics-file,-M <String>    Path to write duplication metrics to.  Default value: null. 
+
+--num-reducers <Integer>      For tools that shuffle data or write an output, sets the number of reducers. Defaults to
+                              0, which gives one partition per 10MB of input.  Default value: 0. 
+
+--optical-duplicate-pixel-distance <Integer>
+                              The maximum offset between two duplicate clusters in order to consider them optical
+                              duplicates. This should usually be set to some fairly small number (e.g. 5-10 pixels)
+                              unless using later versions of the Illumina pipeline that multiply pixel values by 10, in
+                              which case 50-100 is more normal.  Default value: 100. 
+
+--output-shard-tmp-dir <String>
+                              when writing a bam, in single sharded mode this directory to write the temporary
+                              intermediate output shards, if not specified .parts/ will be used  Default value: null. 
+                              Cannot be used in conjunction with argument(s) shardedOutput
+
+--program-name <String>       Name of the program running  Default value: null. 
+
+--QUIET <Boolean>             Whether to suppress job-summary info on System.err.  Default value: false. Possible
+                              values: {true, false} 
+
+--read-filter,-RF <String>    Read filters to be applied before analysis  This argument may be specified 0 or more
+                              times. Default value: null. Possible values: {AlignmentAgreesWithHeaderReadFilter,
+                              AllowAllReadsReadFilter, AmbiguousBaseReadFilter, CigarContainsNoNOperator,
+                              ExcessiveEndClippedReadFilter, FirstOfPairReadFilter,
+                              FlowBasedTPAttributeSymetricReadFilter, FlowBasedTPAttributeValidReadFilter,
+                              FragmentLengthReadFilter, GoodCigarReadFilter, HasReadGroupReadFilter,
+                              HmerQualitySymetricReadFilter, IntervalOverlapReadFilter,
+                              JexlExpressionReadTagValueFilter, LibraryReadFilter, MappedReadFilter,
+                              MappingQualityAvailableReadFilter, MappingQualityNotZeroReadFilter,
+                              MappingQualityReadFilter, MatchingBasesAndQualsReadFilter, MateDifferentStrandReadFilter,
+                              MateDistantReadFilter, MateOnSameContigOrNoMappedMateReadFilter,
+                              MateUnmappedAndUnmappedReadFilter, MetricsReadFilter,
+                              NonChimericOriginalAlignmentReadFilter, NonZeroFragmentLengthReadFilter,
+                              NonZeroReferenceLengthAlignmentReadFilter, NotDuplicateReadFilter,
+                              NotOpticalDuplicateReadFilter, NotProperlyPairedReadFilter,
+                              NotSecondaryAlignmentReadFilter, NotSupplementaryAlignmentReadFilter,
+                              OverclippedReadFilter, PairedReadFilter, PassesVendorQualityCheckReadFilter,
+                              PlatformReadFilter, PlatformUnitReadFilter, PrimaryLineReadFilter,
+                              ProperlyPairedReadFilter, ReadGroupBlackListReadFilter, ReadGroupHasFlowOrderReadFilter,
+                              ReadGroupReadFilter, ReadLengthEqualsCigarLengthReadFilter, ReadLengthReadFilter,
+                              ReadNameReadFilter, ReadStrandFilter, ReadTagValueFilter, SampleReadFilter,
+                              SecondOfPairReadFilter, SeqIsStoredReadFilter, SoftClippedReadFilter,
+                              ValidAlignmentEndReadFilter, ValidAlignmentStartReadFilter, WellformedFlowBasedReadFilter,
+                              WellformedReadFilter} 
+
+--read-index <GATKPath>       Indices to use for the read inputs. If specified, an index must be provided for every read
+                              input and in the same order as the read inputs. If this argument is not specified, the
+                              path to the index for each input will be inferred automatically.  This argument may be
+                              specified 0 or more times. Default value: null. 
+
+--read-name-regex <String>    Regular expression that can be used to parse read names in the incoming SAM file. Read
+                              names are parsed to extract three variables: tile/region, x coordinate and y coordinate.
+                              These values are used to estimate the rate of optical duplication in order to give a more
+                              accurate estimated library size. Set this option to null to disable optical duplicate
+                              detection. The regular expression should contain three capture groups for the three
+                              variables, in order. It must match the entire read name. Note that if the default regex is
+                              specified, a regex match is not actually done, but instead the read name  is split on
+                              colon character. For 5 element names, the 3rd, 4th and 5th elements are assumed to be
+                              tile, x and y values. For 7 element names (CASAVA 1.8), the 5th, 6th, and 7th elements are
+                              assumed to be tile, x and y values.  Default value: <optimized capture of last three ':'
+                              separated fields as numeric values>. 
+
+--read-validation-stringency,-VS <ValidationStringency>
+                              Validation stringency for all SAM/BAM/CRAM/SRA files read by this program.  The default
+                              stringency value SILENT can improve performance when processing a BAM file in which
+                              variable-length data (read, qualities, tags) do not otherwise need to be decoded.  Default
+                              value: SILENT. Possible values: {STRICT, LENIENT, SILENT} 
+
+--reference,-R <GATKPath>     Reference sequence  Default value: null. 
+
+--remove-all-duplicates <Boolean>
+                              If true do not write duplicates to the output file instead of writing them with
+                              appropriate flags set.  Default value: false. Possible values: {true, false}  Cannot be
+                              used in conjunction with argument(s) taggingPolicy removeSequencingDuplicates
+
+--remove-sequencing-duplicates <Boolean>
+                              If true do not write optical/sequencing duplicates to the output file instead of writing
+                              them with appropriate flags set.  Default value: false. Possible values: {true, false} 
+                              Cannot be used in conjunction with argument(s) taggingPolicy removeAllDuplicates
+
+--sharded-output <Boolean>    For tools that write an output, write the output in multiple pieces (shards)  Default
+                              value: false. Possible values: {true, false}  Cannot be used in conjunction with
+                              argument(s) shardedPartsDir
+
+--spark-master <String>       URL of the Spark Master to submit jobs to when using the Spark pipeline runner.  Default
+                              value: local[*]. 
+
+--spark-verbosity <String>    Spark verbosity. Overrides --verbosity for Spark-generated logs only. Possible values:
+                              {ALL, DEBUG, INFO, WARN, ERROR, FATAL, OFF, TRACE}  Default value: null. 
+
+--splitting-index-granularity <Long>
+                              Granularity to use when writing a splitting index, one entry will be put into the index
+                              every n reads where n is this granularity value. Smaller granularity results in a larger
+                              index with more available split points.  Default value: 4096. 
+
+--tmp-dir <GATKPath>          Temp directory to use.  Default value: null. 
+
+--use-jdk-deflater,-jdk-deflater <Boolean>
+                              Whether to use the JdkDeflater (as opposed to IntelDeflater)  Default value: false.
+                              Possible values: {true, false} 
+
+--use-jdk-inflater,-jdk-inflater <Boolean>
+                              Whether to use the JdkInflater (as opposed to IntelInflater)  Default value: false.
+                              Possible values: {true, false} 
+
+--use-nio <Boolean>           Whether to use NIO or the Hadoop filesystem (default) for reading files. (Note that the
+                              Hadoop filesystem is always used for writing files.)  Default value: false. Possible
+                              values: {true, false} 
+
+--verbosity <LogLevel>        Control verbosity of logging.  Default value: INFO. Possible values: {ERROR, WARNING,
+                              INFO, DEBUG} 
+
+--version <Boolean>           display the version number for this tool  Default value: false. Possible values: {true,
+                              false} 
+
+
+Advanced Arguments:
+
+--allow-multiple-sort-orders-in-input <Boolean>
+                              Allow non-queryname sorted inputs when specifying multiple input bams.  Default value:
+                              false. Possible values: {true, false} 
+
+--disable-tool-default-read-filters <Boolean>
+                              Disable all tool default read filters (WARNING: many tools will not function correctly
+                              without their default read filters on)  Default value: false. Possible values: {true,
+                              false} 
+
+--flow-end-pos-uncertainty <Integer>
+                              Maximal number of bases of reads (fragment) ends difference that is marked as match
+                              (should only be applied to flow based reads). Default 0.  Default value: 0. 
+
+--flow-q-is-known-end <Boolean>
+                              Treat reads (fragment) clipped on tm:Q as known end position (should only be applied to
+                              flow based reads) (default: false)  Default value: false. Possible values: {true, false} 
+
+--flow-quality-sum-strategy <Boolean>
+                              Use specific quality summing strategy for flow based reads. The strategy ensures that the
+                              same (and correct) quality value is used for all bases of the same homopolymer. Default
+                              false.  Default value: false. Possible values: {true, false} 
+
+--flow-skip-start-homopolymers <Integer>
+                              Skip first N flows, when considering duplicates (should only be applied to flow based
+                              reads). Default 0.  Default value: 0. 
+
+--flowbased <Boolean>         Single argument for enabling the bulk of flow based features (should only be applied to
+                              flow based reads).  Default value: false. Possible values: {true, false} 
+
+--showHidden <Boolean>        display hidden arguments  Default value: false. Possible values: {true, false} 
+
+--single-end-reads-clipping-is-end <Boolean>
+                              Use clipped, rather than unclipped, when considering duplicates (should only be applied to
+                              flow based reads). Default false.  Default value: false. Possible values: {true, false} 
+
+--single-end-reads-end-position-significant <Boolean>
+                              Make end location of read (fragment) be significant when considering duplicates, in
+                              addition to the start location, which is always significant (should only be applied to
+                              flow based reads). Default false.  Default value: false. Possible values: {true, false} 
+
+--treat-unsorted-as-querygroup-ordered <Boolean>
+                              Treat unsorted files as query-group orderd files. WARNING: This option disables a basic
+                              safety check and may result in unexpected behavior if the file is truly unordered  Default
+                              value: false. Possible values: {true, false} 
+
+Conditional Arguments for readFilter:
+
+Valid only if "AmbiguousBaseReadFilter" is specified:
+--ambig-filter-bases <Integer>Threshold number of ambiguous bases. If null, uses threshold fraction; otherwise,
+                              overrides threshold fraction.  Default value: null.  Cannot be used in conjunction with
+                              argument(s) maxAmbiguousBaseFraction
+
+--ambig-filter-frac <Double>  Threshold fraction of ambiguous bases  Default value: 0.05.  Cannot be used in conjunction
+                              with argument(s) maxAmbiguousBases
+
+Valid only if "ExcessiveEndClippedReadFilter" is specified:
+--max-clipped-bases <Integer> Maximum number of clipped bases on either end of a given read  Default value: 1000. 
+
+Valid only if "FlowBasedTPAttributeValidReadFilter" is specified:
+--read-filter-max-hmer <Integer>
+                              maxHmer to use for testing in the filter  Default value: 12. 
+
+Valid only if "FragmentLengthReadFilter" is specified:
+--max-fragment-length <Integer>
+                              Maximum length of fragment (insert size)  Default value: 1000000. 
+
+--min-fragment-length <Integer>
+                              Minimum length of fragment (insert size)  Default value: 0. 
+
+Valid only if "IntervalOverlapReadFilter" is specified:
+--keep-intervals <String>     One or more genomic intervals to keep  This argument must be specified at least once.
+                              Required. 
+
+Valid only if "JexlExpressionReadTagValueFilter" is specified:
+--read-filter-expression <String>
+                              One or more JEXL expressions used to filter  This argument must be specified at least
+                              once. Required. 
+
+Valid only if "LibraryReadFilter" is specified:
+--library <String>            Name of the library to keep  This argument must be specified at least once. Required. 
+
+Valid only if "MappingQualityReadFilter" is specified:
+--maximum-mapping-quality <Integer>
+                              Maximum mapping quality to keep (inclusive)  Default value: null. 
+
+--minimum-mapping-quality <Integer>
+                              Minimum mapping quality to keep (inclusive)  Default value: 10. 
+
+Valid only if "MateDistantReadFilter" is specified:
+--mate-too-distant-length <Integer>
+                              Minimum start location difference at which mapped mates are considered distant  Default
+                              value: 1000. 
+
+Valid only if "OverclippedReadFilter" is specified:
+--dont-require-soft-clips-both-ends <Boolean>
+                              Allow a read to be filtered out based on having only 1 soft-clipped block. By default,
+                              both ends must have a soft-clipped block, setting this flag requires only 1 soft-clipped
+                              block  Default value: false. Possible values: {true, false} 
+
+--filter-too-short <Integer>  Minimum number of aligned bases  Default value: 30. 
+
+Valid only if "PlatformReadFilter" is specified:
+--platform-filter-name <String>
+                              Platform attribute (PL) to match  This argument must be specified at least once. Required.
+
+Valid only if "PlatformUnitReadFilter" is specified:
+--black-listed-lanes <String> Platform unit (PU) to filter out  This argument must be specified at least once. Required.
+
+Valid only if "ReadGroupBlackListReadFilter" is specified:
+--read-group-black-list <String>
+                              A read group filter expression in the form "attribute:value", where "attribute" is a two
+                              character read group attribute such as "RG" or "PU".  This argument must be specified at
+                              least once. Required. 
+
+Valid only if "ReadGroupReadFilter" is specified:
+--keep-read-group <String>    The name of the read group to keep  Required. 
+
+Valid only if "ReadLengthReadFilter" is specified:
+--max-read-length <Integer>   Keep only reads with length at most equal to the specified value  Required. 
+
+--min-read-length <Integer>   Keep only reads with length at least equal to the specified value  Default value: 1. 
+
+Valid only if "ReadNameReadFilter" is specified:
+--read-name <String>          Keep only reads with this read name  This argument must be specified at least once.
+                              Required. 
+
+Valid only if "ReadStrandFilter" is specified:
+--keep-reverse-strand-only <Boolean>
+                              Keep only reads on the reverse strand  Required. Possible values: {true, false} 
+
+Valid only if "ReadTagValueFilter" is specified:
+--read-filter-tag <String>    Look for this tag in read  Required. 
+
+--read-filter-tag-comp <Float>Compare value in tag to this value  Default value: 0.0. 
+
+--read-filter-tag-op <Operator>
+                              Compare value in tag to value with this operator. If T is the value in the tag, OP is the
+                              operation provided, and V is the value in read-filter-tag, then the read will pass the
+                              filter iff T OP V is true.  Default value: EQUAL. Possible values: {LESS, LESS_OR_EQUAL,
+                              GREATER, GREATER_OR_EQUAL, EQUAL, NOT_EQUAL} 
+
+Valid only if "SampleReadFilter" is specified:
+--sample <String>             The name of the sample(s) to keep, filtering out all others  This argument must be
+                              specified at least once. Required. 
+
+Valid only if "SoftClippedReadFilter" is specified:
+--max-soft-clipped-leading-trailing-ratio <Double>
+                              Threshold ratio of soft clipped bases (leading / trailing the cigar string) to total bases
+                              in read for read to be filtered.  Default value: null.  Cannot be used in conjunction with
+                              argument(s) maximumSoftClippedRatio
+
+--max-soft-clipped-ratio <Double>
+                              Threshold ratio of soft clipped bases (anywhere in the cigar string) to total bases in
+                              read for read to be filtered.  Default value: null.  Cannot be used in conjunction with
+                              argument(s) maximumLeadingTrailingSoftClippedRatio

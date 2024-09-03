@@ -1,0 +1,204 @@
+name: gatk_markduplicatesspark
+description: 
+keywords: [bam, sort, spark, mark duplicates]
+links:
+  homepage: https://gatk.broadinstitute.org/hc/en-us/articles/27007959918363-MarkDuplicatesSpark
+  documentation: https://gatk.broadinstitute.org/hc/en-us/articles/27007959918363-MarkDuplicatesSpark
+  repository: https://github.com/broadinstitute/gatk
+  issue_tracker: https://github.com/broadinstitute/gatk/issues
+references:
+  bibtex: |
+  @book{van2020genomics,
+    title={Genomics in the cloud: using Docker, GATK, and WDL in Terra},
+    author={Van der Auwera, Geraldine A and O'Connor, Brian D},
+    year={2020},
+    publisher={O'Reilly Media}
+  }
+license: Apache-2.0
+requirements:
+  commands: [gatk]
+authors:
+  - __merge__: src/_authors/jakub_majercik.yaml
+
+argument_groups:
+
+  - name: Inputs
+    arguments:
+      - name: --input
+        alternatives: [-I]
+        type: file
+        description: "BAM/SAM/CRAM file containing reads  This argument must be specified at least once."
+        required: true
+        example: input.bam
+      - name: --arguments_file
+        type: file
+        description: "Read one or more arguments files"
+        required: false
+        multiple: true
+        example: arguments.txt
+      - name: --gatk_config_file
+        type: file
+        description: "A configuration file to use with the GATK."
+        required: false
+        example: config.properties
+
+  - name: Outputs
+    arguments:
+      - name: --output
+        alternatives: [-O]
+        type: file
+        direction: output
+        description: "Output bam file with duplicates marked."
+        required: true
+        example: output.bam
+      - name: --metrics-file
+        alternatives: [-M]
+        type: file
+        direction: output
+        description: "File to write duplication metrics to."
+        required: true
+        example: metrics.txt
+      - name: --output-shard-tmp-dir 
+        type: file
+        direction: output
+        description: |
+          When writing a bam, in single sharded mode this directory to write the temporary
+          intermediate output shards, if not specified .parts/ will be used  Default value: null. 
+          Cannot be used in conjunction with argument(s) shardedOutput
+
+  - name: Optional arguments
+    arguments:
+      - name: --add-output-vcf
+        type: boolean_true
+        description: "If true, adds a command line header line to the output SAM to record the command line options used to run the program."
+      - name: --bam_partition_size
+        type: double
+        description: |
+          Maximum number of bytes to read from a file into each partition of reads. Setting this
+          higher will result in fewer partitions. Note that this will not be equal to the size of
+          the partition in memory. Defaults to 0, which uses the default split size (determined by
+          the Hadoop input format, typically the size of one HDFS block).
+        default: 0.0
+      - name: --conf
+        type: string
+        description: |
+          Spark properties to set on the Spark context in the format <property>=<value>  This
+          argument may be specified 0 or more times.
+        multiple: true
+      - name: --create-output-bam-index
+        alternatives: [-OBI]
+        type: boolean
+        description: If true, create a BAM index when writing a coordinate-sorted BAM file.
+        default: true
+      - name: --create-output-bam-splitting_index
+        type: boolean
+        description: If true, create a BAM splitting index (SBI) when writing a coordinate-sorted BAM file. 
+        default: true
+      - name: --create-output-variant-index
+        alternatives: [-OVI]
+        type: boolean
+        description: If true, create a VCF index when writing a coordinate-sorted VCF file.
+        default: true
+      - name: --disable-read-filter
+        alternatives: [-DF]
+        type: string
+        description: |
+          Read filters to be disabled before analysis  This argument may be specified 0 or more
+          times. Default value: null. Possible values: {AllowAllReadsReadFilter} 
+        multiple: true
+      - name: --disable-sequence-dictionary-validation
+        type: boolean_false
+        description: |
+          If specified, do not check the sequence dictionaries from our inputs for compatibility.
+          Use at your own risk.
+      - name: --do-not-mark-unmapped-mates
+        type: boolean_false
+        description: Unmapped mates of duplicate marked reads will not be marked as duplicates.
+      - name: --duplicate-scoring-strategy
+        alternatives: [-DS]
+        type: string
+        description: The scoring strategy for choosing the non-duplicate among candidates.
+        default: SUM_OF_BASE_QUALITIES
+        choices: [SUM_OF_BASE_QUALITIES, TOTAL_MAPPED_REFERENCE_LENGTH, FLOW_SUM_OF_BASE_QUALITIES]
+      - name: --duplicate-tagging-policy
+        type: string
+        description: |
+          Determines how duplicate types are recorded in the DT optional attribute. Cannot be used 
+          in conjunction with argument(s) removeAllDuplicates removeSequencingDuplicates
+        choices: [DontTag, OpticalOnly, All]
+        default: DontTag
+      - name: --exclude-intervals
+        alternatives: [-XL]
+        type: string
+        description: |
+          One or more genomic intervals to exclude from processing.
+        multiple: true
+      - name: --gcs-max-retries
+        type: integer
+        description: |
+          If the GCS bucket channel errors out, how many times it will attempt to re-initiate the connection
+        default: 20
+      - name: --gcs-project-for-requester-pays
+        type: string
+        description: |
+          Project to bill when accessing "requester pays" buckets. If unset, these buckets cannot be accessed.
+      - name: --interval-exclusion-padding
+        alternatives: [-ixp]
+        type: integer
+        description: |
+          Amount of padding (in bp) to add to each interval you are excluding.
+        default: 0
+      - name: --interval-merging-rule
+        alternatives: [-imr]
+        type: string
+        description: |
+          Interval merging rule for abutting intervals
+        default: ALL
+        choices: [ALL, OVERLAPPING_ONLY]
+      - name: --interval-padding
+        alternatives: [-ip]
+        type: integer
+        description: |
+          Amount of padding (in bp) to add to each interval you are including.
+        default: 0
+      - name: --interval-set-rule
+        alternatives: [-isr]
+        type: string
+        description: |
+          Set merging approach to use in generating intervals.
+        default: UNION
+        choices: [UNION, INTERSECTION]
+      - name: --intervals
+        alternatives: [-L]
+        type: string
+        description: |
+          One or more genomic intervals over which to operate.
+        multiple: true
+      - name: --inverted-read-filter
+        alternatives: [-XRF]
+        type: string
+        description: |
+          Inverted (with flipped acceptance/failure conditions) read filters applied before analysis
+          (after regular read filters).
+        multiple: true
+      - name: --num-reducers
+        type: integer
+        description: |
+          For tools that shuffle data or write an output, sets the number of reducers. Defaults to
+          0, which gives one partition per 10MB of input.
+        default: 0
+      - name: --optical-duplicate-pixel-distance
+        type: integer
+        description: |
+          The maximum offset between two duplicate clusters in order to consider them optical
+          duplicates. This should usually be set to some fairly small number (e.g. 5-10 pixels)
+          unless using later versions of the Illumina pipeline that multiply pixel values by 10, in
+          which case 50-100 is more normal.
+        default: 100
+      - name: --program-name
+        type: string
+        description: |
+          Name of the program running.
+      - name: --quiet
+        type: boolean_true
+        description: Whether to suppress job-summary info on System.err.
