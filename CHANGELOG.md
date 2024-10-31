@@ -16,6 +16,11 @@
 
 * `rsem/rsem_calculate_expression`: Calculate expression levels (PR #93).
 
+* `cellranger`:
+  - `cellranger/cellranger_count`: Align fastq files using Cell Ranger count (PR #163).
+
+## BREAKING CHANGES
+
 * `rseqc`:
   - `rseqc/rseqc_inner_distance`: Calculate inner distance between read pairs (PR #159).
   - `rseqc/rseqc_inferexperiment`: Infer strandedness from sequencing reads (PR #158).
